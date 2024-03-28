@@ -1,6 +1,10 @@
 init python in bleeper:
-    from time import sleep
+    from threading import Timer
     from renpy.text.textsupport import TAG, TEXT, PARAGRAPH, DISPLAYABLE
+
+    segments = []
+    timers = []
+    offset = 0.05 # Should be set to half of the length of the soundbits.
 
     def screen_callback(who: str, what: str):
         if who is None and what == "":
@@ -13,17 +17,16 @@ init python in bleeper:
         what_displayable = renpy.get_displayable("say", "what")
         tokens = what_displayable.tokenize(what_displayable.text)
 
-        global segments
-        segments = [[]]
+        segments.clear()
+        segments.append([])
+        delay = 0.0
 
         for kind, token in tokens:
             if kind == TEXT:
-                wait = 1 / (cps_fixed or cps_base * cps_mult)
                 for char in token:
+                    delay += 1 / (cps_fixed or cps_base * cps_mult)
                     if char.isalnum():
-                        segments[-1].append(("o.wav" if who == "Azzy" else "a.wav", wait))
-                    else:
-                        segments[-1].append((None, wait))
+                        segments[-1].append(("o.wav" if who == "Azzy" else "a.wav", delay - offset))
 
             elif kind == TAG:
                 if "=" in token:
@@ -33,6 +36,7 @@ init python in bleeper:
 
                 if tag == "w":
                     segments.append([])
+                    delay = 0.0
 
                 elif tag == "cps":
                     if args[0] == "*":
@@ -52,25 +56,18 @@ init python in bleeper:
         if not interact or type != "say":
             return
 
-        renpy.log((event, interact, type))
-
-        global active
-        active = False
+        for timer in timers:
+            timer.cancel()
+        timers.clear()
 
         if event == "show_done":
-            active = True
-            renpy.invoke_in_thread(__play_segment)
+            for sound, delay in segments.pop(0):
+                if sound is not None:
+                    timer = Timer(delay, renpy.sound.play, (sound, "voice"), {"tight": True})
+                    timer.daemon = True
+                    timers.append(timer)
+                    timer.start()
 
-
-    def __play_segment():
-        for sound, wait in segments.pop(0):
-            sleep(wait)
-
-            if not active:
-                return
-
-            if sound is not None:
-                renpy.sound.play(sound, "voice", tight=True)
 
 define config.all_character_callbacks += [bleeper.character_callback]
 define config.log = "config.log"
