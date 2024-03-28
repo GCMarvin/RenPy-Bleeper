@@ -7,7 +7,7 @@ That's what this project aims to fix!
 In short: A callback is added to the say screen, which uses the passed character and text to setup how and at which delays the sequence of letters should be played, since several text tags like the wait tag or the cps tag might modify this. Another character callback that is added to every character will then play these sequences every time the interaction is started.
 
 ## How To Use
-1. Simply add [`bleeper.rpy`](bleeper.rpy) into your project.
+1. Simply add [`bleeper.rpy`](bleeper.rpy) to your project.
 2. Add the following like to the end of your say screen definition (most likely found in `screens.rpy`):
    ```renpy
    on "show" action Function(bleeper.screen_callback, _update_screens = False)
