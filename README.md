@@ -1,6 +1,6 @@
 # RenPy Bleeper
 
-RenPy has a [guide](https://www.renpy.org/wiki/renpy/doc/cookbook/Expanded_Text_Bleeps) on how to have characters make a bleep sound while they're talking, similar to games like Ace Attorney. The results of this guide, however are very limited. They only allow to play an infinite loop of the same sound to be played, it has lots of bugs in which the game doesn't stop playing the sound when it should, it's not easily configurable for many characters, or expandable, for example to have each letter associated with its own sound file.
+RenPy has a [guide](https://www.renpy.org/wiki/renpy/doc/cookbook/Expanded_Text_Bleeps) on how to have characters make a bleep sound while they're talking, similar to games like Ace Attorney. The results of this guide, however, are very limited. They only allow an infinite loop of the same sound to be played, it has lots of bugs in which the game doesn't stop playing the sound when it should, it's not easily configurable for many characters, or expandable for example to have each letter associated with its own sound file.
 
 That's what this project aims to fix!
 
