@@ -10,7 +10,7 @@ In short: A callback is added to the say screen, which uses the passed character
 1. Simply add [`bleeper.rpy`](bleeper.rpy) to your project.
 2. Add the following like to the end of your say screen definition (most likely found in `screens.rpy`):
    ```renpy
-   on "show" action Function(bleeper.screen_callback, _update_screens = False)
+   on "show" action Function(bleeper.screen_callback, _update_screens=False)
    ```
 3. Add a `who_voice` parameter to your character definition that is the name of the audio file in your project which should be played for each character. For example, if you have the bleep for Eileen stored in `eileen_bleep.wav`, the definition should look similar to this:
    ```renpy
