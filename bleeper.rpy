@@ -1,21 +1,38 @@
 init python in bleeper:
     from threading import Timer
-    from renpy.text.textsupport import TAG, TEXT, PARAGRAPH, DISPLAYABLE
+    from renpy.text.textsupport import TAG, TEXT #, PARAGRAPH, DISPLAYABLE
 
     segments = []
     timers = []
-    offset = 0.05 # Should be set to half of the length of the soundbits.
+    offset = 0.05 # Should be set to half of the length of the soundbits. Can this be done dynamically?
 
-    def screen_callback(who: str, what: str):
-        if who is None and what == "":
+    def screen_callback():
+        """
+        Set this function as the "on show" callback for the say screen
+        by inserting the following line into the say screen definition:
+            on "show" action Function(bleeper.screen_callback, _update_screens = False)
+
+        Give a character a voice by including
+            who_voice="audiofile"
+        in the character definition. The audio file should be a sound file in the game's audio folder.
+        If you want different letters to use different audio files, the audio file argument should be
+        named with an asterisk in place of the letter.
+
+        For example, if the character's voice for the letter "a" is "char_a.wav",
+        for the letter "b" is "char_b.wav", etc., the argument should be "char_*.wav".
+        """
+        who_props = renpy.get_displayable_properties("who", "say")
+        what_display = renpy.get_displayable("say", "what")
+        tokens = what_display.tokenize(what_display.text)
+
+        if "voice" not in who_props:
             return
+
+        voice = who_props["voice"]
 
         cps_base = renpy.store.preferences.text_cps
         cps_fixed = None
         cps_mult = 1.0
-
-        what_displayable = renpy.get_displayable("say", "what")
-        tokens = what_displayable.tokenize(what_displayable.text)
 
         segments.clear()
         segments.append([])
@@ -25,8 +42,10 @@ init python in bleeper:
             if kind == TEXT:
                 for char in token:
                     delay += 1 / (cps_fixed or cps_base * cps_mult)
+
                     if char.isalnum():
-                        segments[-1].append(("o.wav" if who == "Azzy" else "a.wav", delay - offset))
+                        sound = voice.replace("*", char.lower())
+                        segments[-1].append((sound, delay - offset))
 
             elif kind == TAG:
                 if "=" in token:
@@ -49,7 +68,7 @@ init python in bleeper:
                     cps_mult = 1.0
 
             else:
-                raise ValueError(f"Token kind '{kind}' is not supported yet.")
+                raise ValueError(f"Token kind '{kind}' is not supported yet. Better get to work!")
 
 
     def character_callback(event: str, interact: bool, type: str):
@@ -70,4 +89,3 @@ init python in bleeper:
 
 
 define config.all_character_callbacks += [bleeper.character_callback]
-define config.log = "config.log"
