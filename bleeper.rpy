@@ -13,7 +13,7 @@ init python in bleeper:
             on "show" action Function(bleeper.screen_callback, _update_screens = False)
 
         Give a character a voice by including
-            who_voice="audiofile"
+            what_voice="audiofile"
         in the character definition. The audio file should be a sound file in the game's audio folder.
         If you want different letters to use different audio files, the audio file argument should be
         named with an asterisk in place of the letter.
@@ -21,14 +21,14 @@ init python in bleeper:
         For example, if the character's voice for the letter "a" is "char_a.wav",
         for the letter "b" is "char_b.wav", etc., the argument should be "char_*.wav".
         """
-        who_props = renpy.get_displayable_properties("who", "say")
         what_display = renpy.get_displayable("say", "what")
+        what_props = renpy.get_displayable_properties("what", "say")
         tokens = what_display.tokenize(what_display.text)
 
-        if "voice" not in who_props:
+        if "voice" not in what_props:
             return
 
-        voice = who_props["voice"]
+        voice = what_props["voice"]
 
         cps_base = renpy.store.preferences.text_cps
         cps_fixed = None
