@@ -79,7 +79,7 @@ init python in bleeper:
             timer.cancel()
         timers.clear()
 
-        if event == "show_done":
+        if event == "show_done" and segments:
             for sound, delay in segments.pop(0):
                 if sound is not None:
                     timer = Timer(delay, renpy.sound.play, (sound, "voice"), {"tight": True})
