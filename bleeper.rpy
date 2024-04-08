@@ -2,6 +2,11 @@ init python in bleeper:
     from threading import Timer
     from renpy.text.textsupport import TAG, TEXT #, PARAGRAPH, DISPLAYABLE
 
+    # Register a number of channels for the bleeps, so they don't overlap.
+    BLEEP_CHANNEL_COUNT = 10
+    for i in range(BLEEP_CHANNEL_COUNT):
+        renpy.music.register_channel(f"bleeps_{i}", "voice", 0, tight=True, buffer_queue=False)
+
     segments = []
     timers = []
     offset = 0.05 # Should be set to half of the length of the soundbits. Can this be done dynamically? TODO.
@@ -10,7 +15,7 @@ init python in bleeper:
         """
         Set this function as the "on show" callback for the say screen
         by inserting the following line into the say screen definition:
-            on "show" action Function(bleeper.screen_callback, _update_screens = False)
+            on "show" action Function(bleeper.screen_callback, _update_screens=False)
 
         Give a character a voice by including
             what_voice="audiofile"
@@ -95,9 +100,9 @@ init python in bleeper:
         # If the event is "show_done", meaning the text is currently in the process of
         # being shown, and segments exist, set the timers to play the sound files.
         if event == "show_done" and segments:
-            for sound, delay in segments.pop(0):
+            for idx, (sound, delay) in enumerate(segments.pop(0)):
                 if sound is not None:
-                    timer = Timer(delay, renpy.sound.play, (sound, "voice"), {"tight": True})
+                    timer = Timer(delay, renpy.sound.play, (sound, f"bleeps_{idx % BLEEP_CHANNEL_COUNT}"))
                     timer.daemon = True
                     timers.append(timer)
                     timer.start()
