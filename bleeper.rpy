@@ -2,10 +2,10 @@ init python in bleeper:
     from threading import Timer
     from renpy.text.textsupport import TAG, TEXT #, PARAGRAPH, DISPLAYABLE
 
-    # Register a number of channels for the bleeps, so they don't overlap.
+    # Register a fixed number of channels for the bleeps, so they don't overlap.
     BLEEP_CHANNEL_COUNT = 10
     for i in range(BLEEP_CHANNEL_COUNT):
-        renpy.music.register_channel(f"bleeps_{i}", "voice", 0, tight=True, buffer_queue=False)
+        renpy.music.register_channel(f"bleeps_{i}", "voice", 0, file_prefix="bleeps/", tight=True, buffer_queue=False)
 
     segments = []
     timers = []
@@ -19,9 +19,9 @@ init python in bleeper:
 
         Give a character a voice by including
             what_voice="audiofile"
-        in the character definition. The audio file should be a sound file in the game's audio folder.
-        If you want different letters to use different audio files, the audio file argument should be
-        named with an asterisk in place of the letter.
+        in the character definition. The audio file should be a sound file in a "bleeps" folder in the
+        game's audio folder. If you want different letters to use different audio files, the audio file
+        argument should be named with an asterisk in place of the letter.
 
         For example, if the character's voice for the letter "a" is "char_a.wav",
         for the letter "b" is "char_b.wav", etc., the argument should be "char_*.wav".
