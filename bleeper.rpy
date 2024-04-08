@@ -1,6 +1,6 @@
 init python in bleeper:
     from threading import Timer
-    from renpy.text.textsupport import TAG, TEXT #, PARAGRAPH, DISPLAYABLE
+    from renpy.text.textsupport import TAG, TEXT  # , PARAGRAPH, DISPLAYABLE
 
     # Register a fixed number of channels for the bleeps, so they don't overlap.
     BLEEP_CHANNEL_COUNT = 10
@@ -9,7 +9,8 @@ init python in bleeper:
 
     segments = []
     timers = []
-    offset = 0.05 # Should be set to half of the length of the soundbits. Can this be done dynamically? TODO.
+    offset = 0.05  # Should be set to half of the length of the soundbits. Can this be done dynamically? TODO.
+
 
     def screen_callback():
         """
@@ -101,11 +102,10 @@ init python in bleeper:
         # being shown, and segments exist, set the timers to play the sound files.
         if event == "show_done" and segments:
             for idx, (sound, delay) in enumerate(segments.pop(0)):
-                if sound is not None:
-                    timer = Timer(delay, renpy.sound.play, (sound, f"bleeps_{idx % BLEEP_CHANNEL_COUNT}"))
-                    timer.daemon = True
-                    timers.append(timer)
-                    timer.start()
+                timer = Timer(delay, renpy.sound.play, (sound, f"bleeps_{idx % BLEEP_CHANNEL_COUNT}"))
+                timer.daemon = True
+                timers.append(timer)
+                timer.start()
 
 # Add the bleeper callback to all characters.
 define config.all_character_callbacks += [bleeper.character_callback]
