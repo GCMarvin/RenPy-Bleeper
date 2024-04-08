@@ -3,7 +3,8 @@ init python in bleeper:
     from renpy.text.textsupport import TAG, TEXT  # , PARAGRAPH, DISPLAYABLE
 
     # Register a fixed number of channels for the bleeps, so they don't overlap.
-    BLEEP_CHANNEL_COUNT = 10
+    # A hundred channels should be enough for most cases, and don't seem to cause any performance issues.
+    BLEEP_CHANNEL_COUNT = 100
     for i in range(BLEEP_CHANNEL_COUNT):
         renpy.music.register_channel(f"bleeps_{i}", "voice", 0, file_prefix="bleeps/", tight=True, buffer_queue=False)
 
