@@ -14,10 +14,10 @@ In short: A callback is added to the say screen, which uses the passed character
    ```
 3. Add a `who_voice` parameter to your character definition that is the name of the audio file in your project which should be played for each character. For example, if you have the bleep for Eileen stored in `eileen_bleep.wav`, the definition should look similar to this:
    ```renpy
-   define eileen = Character("Eileen", who_voice="eileen_bleep.wav")
+   define eileen = Character("Eileen", what_voice="eileen_bleep.wav")
    ```
 
    You may also provide a file name including an asterisk, in which case different files will be used for each letter, replacing the asterisk in the filename. For example, if Eileen's bleep sound for the letter "a" is named "eileen_a.wav", for the letter "b" "eileen_b.wav", etc., it should look like this:
    ```renpy
-   define eileen = Character("Eileen", who_voice="eileen_*.wav")
+   define eileen = Character("Eileen", what_voice="eileen_*.wav")
    ``` 
