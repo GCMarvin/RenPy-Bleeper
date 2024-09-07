@@ -1,27 +1,23 @@
-init python in bleeper:
+init python in blipper:
     from threading import Timer
-    from renpy.text.textsupport import TAG, TEXT  # , PARAGRAPH, DISPLAYABLE
+    from renpy.text.textsupport import TAG, TEXT
 
-    # Register a fixed number of channels for the bleeps, so they don't overlap.
-    # A hundred channels should be enough for most cases, and don't seem to cause any performance issues.
-    BLEEP_CHANNEL_COUNT = 100
-    for i in range(BLEEP_CHANNEL_COUNT):
-        renpy.music.register_channel(f"bleeps_{i}", "voice", 0, file_prefix="bleeps/", tight=True, buffer_queue=False)
+    renpy.music.register_channel(name="blips", mixer="voice", file_prefix="blips/")
 
     segments = []
     timers = []
-    offset = 0.05  # Should be set to half of the length of the soundbits. Can this be done dynamically? TODO.
+    spacing = 0.040        # The expected average duration of blips in seconds. TODO: Calculate this dynamically.
+    offset = -spacing / 2  # Offset to play the sound a bit earlier, so it's at its peak when the character is shown.
 
-
-    def screen_callback():
+    def screen_callback() -> None:
         """
         Set this function as the "on show" callback for the say screen
         by inserting the following line into the say screen definition:
-            on "show" action Function(bleeper.screen_callback, _update_screens=False)
+            on "show" action Function(blipper.screen_callback, _update_screens=False)
 
         Give a character a voice by including
-            what_voice="audiofile"
-        in the character definition. The audio file should be a sound file in a "bleeps" folder in the
+            what_voice="audiofile.wav"
+        in the character definition. The audio file should be a sound file in a "blips" folder in the
         game's audio folder. If you want different letters to use different audio files, the audio file
         argument should be named with an asterisk in place of the letter.
 
@@ -30,19 +26,22 @@ init python in bleeper:
         """
         # Get the currently displaying text and its properties.
         # The text is tokenized using RenPy's included tokenizer.
-        what_display = renpy.get_displayable("say", "what")
         what_props = renpy.get_displayable_properties("what", "say")
+        what_display = renpy.get_displayable("say", "what")
         tokens = what_display.tokenize(what_display.text)
 
-        # If the character doesn't have their voice property set, return early.
-        if "voice" not in what_props:
-            return
-
-        voice = what_props["voice"]
+        voice = what_props.get("voice", None)
 
         cps_base = renpy.store.preferences.text_cps
         cps_fixed = None
         cps_mult = 1.0
+
+        if (
+            renpy.is_skipping()  # Return early if the game is currently skipping text,
+            or cps_base == 0     # or the text speed is set to instant,
+            or not voice         # or the character doesn't have a voice.
+        ):
+            return
 
         segments.clear()
         segments.append([])
@@ -58,7 +57,7 @@ init python in bleeper:
 
                     if char.isalnum():
                         sound = voice.replace("*", char.lower())
-                        segments[-1].append((sound, delay - offset))
+                        segments[-1].append((sound, delay + offset))
 
             # If the token is a tag, check if it's a tag that influences character speed or segment count.
             elif kind == TAG:
@@ -84,11 +83,11 @@ init python in bleeper:
                     cps_fixed = None
                     cps_mult = 1.0
 
-            else:
-                raise ValueError(f"Token kind '{kind}' is not supported yet. Better get to work!")
+    def play_blip(sound: str) -> None:
+        if not renpy.music.get_playing("blips"):
+            renpy.sound.play(sound, "blips")
 
-
-    def character_callback(event: str, interact: bool, type: str) -> None:
+    def character_callback(event: str, interact: bool, type: str, what: str, **__) -> None:
         # Having the callback triggered in any case means that the previous text is
         # no longer available. Thus, all remaining timers should be cancelled.
         for timer in timers:
@@ -102,11 +101,11 @@ init python in bleeper:
         # If the event is "show_done", meaning the text is currently in the process of
         # being shown, and segments exist, set the timers to play the sound files.
         if event == "show_done" and segments:
-            for idx, (sound, delay) in enumerate(segments.pop(0)):
-                timer = Timer(delay, renpy.sound.play, (sound, f"bleeps_{idx % BLEEP_CHANNEL_COUNT}"))
+            for sound, delay in segments.pop(0):
+                timer = Timer(delay, play_blip, (sound,))
                 timer.daemon = True
                 timers.append(timer)
                 timer.start()
 
-# Add the bleeper callback to all characters.
-define config.all_character_callbacks += [bleeper.character_callback]
+# Add the blipper callback to all characters.
+define config.all_character_callbacks += [blipper.character_callback]
